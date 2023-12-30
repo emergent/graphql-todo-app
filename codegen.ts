@@ -10,7 +10,7 @@ const config: CodegenConfig = {
       config: {
         useIndexSignature: true,
         contextType: "../context#Context",
-        //enumsAsTypes: true
+        enumsAsTypes: true
       }
     }
   }

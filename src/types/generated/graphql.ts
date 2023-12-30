@@ -84,10 +84,9 @@ export type Todo = {
   userId?: Maybe<Scalars['String']['output']>;
 };
 
-export enum TodoStatus {
-  Done = 'done',
-  Pending = 'pending'
-}
+export type TodoStatus =
+  | 'done'
+  | 'pending';
 
 export type UpdateTodoInput = {
   description?: InputMaybe<Scalars['String']['input']>;
