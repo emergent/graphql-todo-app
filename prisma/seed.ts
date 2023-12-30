@@ -16,12 +16,16 @@ const createUsers = async () => {
   const promises = [...Array(3)].map((_, i) => {
     const userId = `${i + 1}`;
     return prisma.user.upsert({
-      where: { id: userId },
-      update: {},
       create: {
         id: userId,
         name: `seed_user_${userId}`,
+        email: `seed_user_${userId}@example.com`
       },
+      update: {
+        name: `seed_user_${userId}`,
+        email: `seed_user_${userId}@example.com`
+      },
+      where: { id: userId },
     });
   })
   return await Promise.all(promises);

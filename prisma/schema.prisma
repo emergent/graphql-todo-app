@@ -29,5 +29,6 @@ model Todo {
 model User {
   id    String  @id @unique
   name  String?
+  email String?
   todos Todo[]
 }
