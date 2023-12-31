@@ -5,7 +5,7 @@ type Query {
 }
 
 type Mutation {
-  addTodo(input: AddTodoInput): Todo
+  addTodo(input: AddTodoInput): Todo!
   updateTodo(id: Int, input: UpdateTodoInput): Todo
   deleteTodo(id: Int): Todo
   createUser(id: String, input: UserInput): User
@@ -14,12 +14,10 @@ type Mutation {
 
 input AddTodoInput {
   title: String!
-  description: String
 }
 
 input UpdateTodoInput {
   title: String
-  description: String
   status: TodoStatus
 }
 
@@ -36,8 +34,7 @@ type Todo {
   id: Int
   createdAt: Date
   updatedAt: Date
-  title: String
-  description: String
+  title: String!
   status: TodoStatus!
   user: User
   userId: String

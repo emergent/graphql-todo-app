@@ -19,13 +19,12 @@ export type Scalars = {
 };
 
 export type AddTodoInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addTodo?: Maybe<Todo>;
+  addTodo: Todo;
   createUser?: Maybe<User>;
   deleteTodo?: Maybe<Todo>;
   updateTodo?: Maybe<Todo>;
@@ -75,10 +74,9 @@ export type QueryGetTodoByIdArgs = {
 export type Todo = {
   __typename?: 'Todo';
   createdAt?: Maybe<Scalars['Date']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['Int']['output']>;
   status: TodoStatus;
-  title?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['Date']['output']>;
   user?: Maybe<User>;
   userId?: Maybe<Scalars['String']['output']>;
@@ -89,7 +87,6 @@ export type TodoStatus =
   | 'pending';
 
 export type UpdateTodoInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<TodoStatus>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
@@ -212,7 +209,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  addTodo?: Resolver<Maybe<ResolversTypes['Todo']>, ParentType, ContextType, Partial<MutationAddTodoArgs>>;
+  addTodo?: Resolver<ResolversTypes['Todo'], ParentType, ContextType, Partial<MutationAddTodoArgs>>;
   createUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, Partial<MutationCreateUserArgs>>;
   deleteTodo?: Resolver<Maybe<ResolversTypes['Todo']>, ParentType, ContextType, Partial<MutationDeleteTodoArgs>>;
   updateTodo?: Resolver<Maybe<ResolversTypes['Todo']>, ParentType, ContextType, Partial<MutationUpdateTodoArgs>>;
@@ -227,10 +224,9 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
 
 export type TodoResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Todo'] = ResolversParentTypes['Todo']> = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['TodoStatus'], ParentType, ContextType>;
-  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   userId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

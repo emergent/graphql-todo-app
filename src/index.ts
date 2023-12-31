@@ -30,20 +30,41 @@ const typeDefs = loadSchemaSync(join(__dirname, '../schema.graphql'), {
 
 const myPlugin = {
   // Fires whenever a GraphQL request is received from a client.
-  async requestDidStart(requestContext: any) {
+  async requestDidStart(requestContext) {
     console.log('Request started! Query:\n' + requestContext.request.query);
 
     return {
       // Fires whenever Apollo Server will parse a GraphQL
       // request to create its associated document AST.
-      async parsingDidStart(requestContext: any) {
+      async parsingDidStart(requestContext) {
         console.log('Parsing started!');
       },
 
       // Fires whenever Apollo Server will validate a
       // request's document AST against your GraphQL schema.
-      async validationDidStart(requestContext: any) {
+      async validationDidStart(requestContext) {
         console.log('Validation started!');
+      },
+
+      async didResolveOperation(requestContext) {
+        console.log(`Resolve operation!: ${requestContext}`);
+      },
+
+      async executionDidStart(executionRequestContext) {
+        return {
+          willResolveField({ source, args, contextValue, info }) {
+            const start = process.hrtime.bigint();
+            return (error, result) => {
+              const end = process.hrtime.bigint();
+              console.log(`Field ${info.parentType.name}.${info.fieldName} took ${end - start}ns`);
+              if (error) {
+                console.log(`It failed with ${error}`);
+              } else {
+                console.log(`It returned ${result}`);
+              }
+            };
+          },
+        };
       },
     };
   },
@@ -110,13 +131,16 @@ const { url } = await startStandaloneServer(server, {
 
       const ui: Auth0UserInfo = Auth0UserInfoObject.parse(userInfo);
 
-      return {
+      const context: Context = {
         user: {
           id: user.sub,
           name: ui.nickname,
           email: ui.email
         }
-      } as Context
+      } as Context;
+
+      return context;
+
     } catch (error) {
       console.log(error)
       return {
