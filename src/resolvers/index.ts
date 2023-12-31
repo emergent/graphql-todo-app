@@ -1,5 +1,5 @@
 import { Resolvers } from '../types/generated/graphql';
-import { createUser } from './mutation/createUser';
+import * as mutation from './mutation/createUser';
 import { dateScalar } from './scalar/date';
 
 const resolvers: Resolvers = {
@@ -8,13 +8,7 @@ const resolvers: Resolvers = {
     getTodos: () => [],
     getTodoById: () => null,
   },
-  Mutation: {
-    addTodo: () => null,
-    updateTodo: () => null,
-    deleteTodo: () => null,
-    createUser: createUser,
-    updateUser: () => null,
-  },
+  Mutation: mutation,
   Date: dateScalar
 }
 
