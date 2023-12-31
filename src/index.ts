@@ -4,34 +4,48 @@ import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { loadSchemaSync } from '@graphql-tools/load';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { Context } from './types/context';
+import resolvers from './resolvers';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
+import fetch from 'node-fetch';
+import { APOLLO_SERVER_PORT, AUTH0_DOMAIN, AUTH0_AUDIENCE } from './config/constants';
+import { z } from 'zod';
+
+const Auth0UserInfoObject = z.object({
+  nickname: z.string(),
+  email: z.string()
+});
+type Auth0UserInfo = z.infer<typeof Auth0UserInfoObject>;
 
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const typeDefs = loadSchemaSync(join(__dirname, '../schema.graphql'), {
   loaders: [new GraphQLFileLoader()],
 });
 
-const books = [
-  {
-    title: 'The Awakening',
-    author: 'Kate Chopin',
-  },
-  {
-    title: 'City of Glass',
-    author: 'Paul Auster',
-  },
-];
+const myPlugin = {
+  // Fires whenever a GraphQL request is received from a client.
+  async requestDidStart(requestContext: any) {
+    console.log('Request started! Query:\n' + requestContext.request.query);
 
-// Resolvers define how to fetch the types defined in your schema.
-// This resolver retrieves books from the "books" array above.
-const resolvers = {
-  Query: {
-    books: () => books,
+    return {
+      // Fires whenever Apollo Server will parse a GraphQL
+      // request to create its associated document AST.
+      async parsingDidStart(requestContext: any) {
+        console.log('Parsing started!');
+      },
+
+      // Fires whenever Apollo Server will validate a
+      // request's document AST against your GraphQL schema.
+      async validationDidStart(requestContext: any) {
+        console.log('Validation started!');
+      },
+    };
   },
 };
 
@@ -40,6 +54,7 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  plugins: [myPlugin]
 });
 
 // Passing an ApolloServer instance to the `startStandaloneServer` function:
@@ -47,7 +62,69 @@ const server = new ApolloServer({
 //  2. installs your ApolloServer instance as middleware
 //  3. prepares your app to handle incoming requests
 const { url } = await startStandaloneServer(server, {
-  listen: { port: 4000 },
+  listen: { port: parseInt(APOLLO_SERVER_PORT) },
+  context: async ({ req, res }) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token === undefined) {
+      return {
+        user: undefined
+      };
+    }
+
+    try {
+      const user = await new Promise<JwtPayload>((resolve, reject) => {
+        const client = jwksClient({
+          jwksUri: `${AUTH0_DOMAIN}/.well-known/jwks.json`,
+        });
+        jwt.verify(
+          token,
+          (header, cb) => {
+            client.getSigningKey(header.kid, (err, key) => {
+              const signingKey = key?.getPublicKey();
+              cb(null, signingKey);
+            });
+          },
+          {
+            audience: `${AUTH0_AUDIENCE}`,
+            issuer: `${AUTH0_DOMAIN}/`,
+            algorithms: ['RS256']
+          },
+          (err, decoded) => {
+            if (err) {
+              return reject(err);
+            }
+            if (decoded === undefined || typeof decoded === "string") {
+              return reject('decoded is invalid.');
+            }
+            resolve(decoded);
+          }
+        );
+      });
+
+      const userInfo = await fetch(`${AUTH0_DOMAIN}/userinfo`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => res.json());
+
+      const ui: Auth0UserInfo = Auth0UserInfoObject.parse(userInfo);
+
+      return {
+        user: {
+          id: user.sub,
+          name: ui.nickname,
+          email: ui.email
+        }
+      } as Context
+    } catch (error) {
+      console.log(error)
+      return {
+        user: undefined
+      }
+    }
+  }
 });
 
 console.log(`🚀  Server ready at: ${url}`);
+
