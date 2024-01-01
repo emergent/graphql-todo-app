@@ -2,10 +2,7 @@ import { prisma } from '../../lib/prisma';
 import { MutationResolvers } from '../../types/generated/graphql';
 
 export const addTodo: MutationResolvers['addTodo'] = async (
-  parent,
-  args,
-  context,
-  info
+  parent, args, context, info
 ) => {
   const userId = context.user?.id;
   if (!userId) {
@@ -21,11 +18,9 @@ export const addTodo: MutationResolvers['addTodo'] = async (
     data: {
       title,
       status: 'pending',
-      userId: userId,
+      userId,
     },
-    include: {
-      user: true,
-    },
+    include: { user: true, },
   });
   return todo;
 };

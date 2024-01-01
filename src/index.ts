@@ -66,6 +66,10 @@ const myPlugin = {
           },
         };
       },
+
+      async didEncounterErrors(requestContext) {
+        console.log(`Error: ${requestContext.errors}`)
+      }
     };
   },
 };

@@ -5,9 +5,8 @@ CREATE TYPE "TodoStatus" AS ENUM ('done', 'pending');
 CREATE TABLE "Todo" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "title" VARCHAR(255) NOT NULL,
-    "description" TEXT,
     "status" "TodoStatus" NOT NULL DEFAULT 'pending',
     "userId" TEXT NOT NULL,
 

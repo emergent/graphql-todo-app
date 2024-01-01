@@ -1,12 +1,8 @@
-import { TodoStatus } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { InputMaybe, MutationResolvers } from '../../types/generated/graphql';
 
 export const updateTodo: MutationResolvers['updateTodo'] = async (
-  parent,
-  args,
-  context,
-  info
+  parent, args, context, info
 ) => {
   const userId = context.user?.id;
   if (!userId) {
